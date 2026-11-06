@@ -8,22 +8,37 @@ Control a **JBL Bar 800 MK2** from Home Assistant through its local HTTPS API, w
 - Reliable **standby detection**, so HA does not show a mode the bar has already dropped
 - A compact Bubble Card section for the dashboard
 
-Everything uses core `command_line` and `shell_command`. I went this way because the HACS JBL integration I tried first had open reports of blocking HA startup.
+Everything uses core `command_line` and `shell_command`. I went this way after reading open reports of [MrBearPresident/JBL_Soundbar](https://github.com/MrBearPresident/JBL_Soundbar) v1.7.0 blocking HA startup.
+
+## Which should you use?
+
+**Want a full integration?** Use [SH1FT-W/jbl-bar](https://github.com/SH1FT-W/jbl-bar). It is a HACS custom integration with a media player entity, a UI config flow, and entities for power, EQ, rear speakers, Dolby Atmos, sleep timer and source. For most people it is the easier route. I have not tested it on the 800 MK2 myself.
+
+**Use this repo if you want:**
+
+- **Zero custom components**: only core `command_line` and `shell_command`, nothing extra to keep updated.
+- **Broadcast (FlexListening)**: the app's Broadcasting setting. I did not find it in the parts of SH1FT-W's code I read (November 2026), so check there first if you need it.
+- **Standby handling**: the bar silently drops night and broadcast mode when it sleeps; this guide shows how to keep HA's view correct.
+- **App step mappings measured on an 800 MK2**: Bass 1 to 5 in dB, rear volume Mute to High.
+- **A ready dashboard section** and a script to map values on your own bar.
+
+Mixing the two is fine too: the command reference below works alongside any integration.
 
 Tested on a Bar 800 MK2, firmware `26.33.11.82.00` (One OS 4.0), November 2026. Other JBL One bars (300 to 1300, MK2) share most of this API, but check the values yourself.
 
 ## Contents
 
-1. [Requirements](#requirements)
-2. [How the API works](#how-the-api-works)
-3. [Command reference](#command-reference)
-4. [Install](#install)
-5. [Scripts](#scripts)
-6. [Standby detection](#standby-detection)
-7. [Dashboard](#dashboard)
-8. [Mapping values yourself](#mapping-values-yourself)
-9. [Gotchas](#gotchas)
-10. [Credits](#credits)
+1. [Which should you use?](#which-should-you-use)
+2. [Requirements](#requirements)
+3. [How the API works](#how-the-api-works)
+4. [Command reference](#command-reference)
+5. [Install](#install)
+6. [Scripts](#scripts)
+7. [Standby detection](#standby-detection)
+8. [Dashboard](#dashboard)
+9. [Mapping values yourself](#mapping-values-yourself)
+10. [Gotchas](#gotchas)
+11. [Credits](#credits)
 
 ## Requirements
 
@@ -58,8 +73,8 @@ Everything below was verified on the 800 MK2 unless marked otherwise.
 | Night mode | GET `getPersonalListeningMode` | POST `setPersonalListeningMode` `{"status":"on"}` | `status`: `on` / `off` |
 | Broadcast | POST `getProdSetting` `{"FlexListening":""}` | POST `setProdSetting` `{"FlexListening":"2"}` | `0` off, `1` mono, `2` stereo. Turning it on turns night mode off |
 | Rear speakers | GET `getRearSpeakerStatus` | | `rears[0]` left, `rears[1]` right, each with `capicity` (sic, battery %), `charging`, `docked`, `status` (online/offline), `volume` |
-| Rear volume | GET `getRearSpeakerVolume` | POST `setRearSpeakerVolume` `{"volume":"N"}` | `0` Mute, `1` Low, `2` Mid, `3` High. Ignored while the rears are docked |
-| Bass | GET `getEQ` | POST `setActiveEQ` (see below) | App step 1 to 5 = Custom EQ 125 Hz gain of `-9`, `-4.5`, `0`, `+3`, `+6` dB |
+| Rear volume | GET `getRearSpeakerVolume` | POST `setRearSpeakerVolume` `{"volume":"N"}` (write untested here) | `0` Mute, `1` Low, `2` Mid, `3` High, mapped from the app. Ignored while the rears are docked |
+| Bass | GET `getEQ` | POST `setActiveEQ` (see below; payload from SH1FT-W, write untested here) | App step 1 to 5 = Custom EQ 125 Hz gain of `-9`, `-4.5`, `0`, `+3`, `+6` dB |
 | EQ presets | GET `getEQList` | | `active_eq_id`, plus the 7 band gains of each preset |
 | Smart mode | GET `getSmartMode` | POST `setSmartMode` | Needs the full payload `{"auto_mode_switch":1,"manual_mode":N,"status":"on"}`. Not Broadcast |
 | Voice clarity | GET `getPureVoiceState` | POST `setPureVoiceState` `{"purevoice_state":"1"}` (from SH1FT-W, untested here) | `1` on |
@@ -473,6 +488,10 @@ Change one control at a time and wait a few seconds per step. A 2 second poll mi
 - [SH1FT-W/jbl-bar](https://github.com/SH1FT-W/jbl-bar) (Apache-2.0): command names, the `setActiveEQ` payload shape, and the `getPowerState` meaning.
 - [MrBearPresident/JBL_Soundbar](https://github.com/MrBearPresident/JBL_Soundbar) (MIT): the client certificate approach.
 - [Bubble Card](https://github.com/Clooos/Bubble-Card) for the dashboard.
+
+## Disclaimer
+
+This guide and its code were written with [Claude](https://claude.ai) (Anthropic) as a coding assistant. The probing, value mapping and testing were done together on my own Bar 800 MK2, and every value marked as verified was read from the real bar. Still, treat it as a starting point and check the values on your own setup.
 
 ## License
 
