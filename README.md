@@ -74,7 +74,7 @@ Everything below was verified on the 800 MK2 unless marked otherwise.
 | Broadcast | POST `getProdSetting` `{"FlexListening":""}` | POST `setProdSetting` `{"FlexListening":"2"}` | `0` off, `1` mono, `2` stereo. Turning it on turns night mode off |
 | Rear speakers | GET `getRearSpeakerStatus` | | `rears[0]` left, `rears[1]` right, each with `capicity` (sic, battery %), `charging`, `docked`, `status` (online/offline), `volume` |
 | Rear volume | GET `getRearSpeakerVolume` | POST `setRearSpeakerVolume` `{"volume":"N"}` (write untested here) | `0` Mute, `1` Low, `2` Mid, `3` High, mapped from the app. Ignored while the rears are docked |
-| Bass | GET `getEQ` | POST `setActiveEQ` (see below; payload from SH1FT-W, write untested here) | App step 1 to 5 = Custom EQ 125 Hz gain of `-9`, `-4.5`, `0`, `+3`, `+6` dB |
+| Bass | GET `getEQ` | POST `setActiveEQ` (see below; payload from SH1FT-W, verified here) | App step 1 to 5 = Custom EQ 125 Hz gain of `-9`, `-4.5`, `0`, `+3`, `+6` dB |
 | EQ presets | GET `getEQList` | | `active_eq_id`, plus the 7 band gains of each preset |
 | Smart mode | GET `getSmartMode` | POST `setSmartMode` | Needs the full payload `{"auto_mode_switch":1,"manual_mode":N,"status":"on"}`. Not Broadcast |
 | Voice clarity | GET `getPureVoiceState` | POST `setPureVoiceState` `{"purevoice_state":"1"}` (from SH1FT-W, untested here) | `1` on |
